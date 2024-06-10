@@ -12,12 +12,9 @@ func main() {
 		println(err)
 		log.Fatal(err)
 	}
-	rows, err := file.GetRows("High VC")
-	if err != nil {
-		println(err)
-		log.Fatal(err)
-	}
-	println(rows)
-	log.Println(rows[8][1])
+defer file.Close()
 
+for _, row := range excelize.Rows {
+	for _, colCell
+}
 }
