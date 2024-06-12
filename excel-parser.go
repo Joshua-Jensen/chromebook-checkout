@@ -16,7 +16,7 @@ func main() {
 		println(err)
 		log.Fatal(err)
 	}
-defer file.Close()
+	defer file.Close()
 
 rows,err := file.GetRows("csp") 
 if err != nil {
