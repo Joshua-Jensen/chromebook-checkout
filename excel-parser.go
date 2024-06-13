@@ -1,10 +1,12 @@
 package main
 
 import (
+	"async"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -12,6 +14,17 @@ import (
 )
 
 func main() {
+var debug bool = true
+
+
+path := async.Exec(func() interface{}  {
+	return getPath()
+})
+
+if debug{
+	fmt.Println(path)
+	os.Exit(0)
+}
 	file, err := excelize.OpenFile("J:/source2/go-projects/chromebook-checkout/cli-tool-test.xlsx")
 	if err != nil {
 		println(err)
@@ -68,4 +81,14 @@ func main() {
 		}
 	}
 
+}
+
+func getPath() (string){
+	var path string
+fmt.Println("enter file path: ")
+fmt.Scanln(&path)
+re := regexp.MustCompile(`\\`)
+path = re.ReplaceAllLiteralString(path, "/")
+
+return path
 }
