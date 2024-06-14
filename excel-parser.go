@@ -1,7 +1,6 @@
 package main
 
 import (
-	"async"
 	"fmt"
 	"log"
 	"os"
@@ -14,18 +13,19 @@ import (
 )
 
 func main() {
-var debug bool = true
+	type envVariables struct {
+		path          string
+		worksheetName string
+	}
+	var debug bool = true
+	println("debug mode:", debug)
+	pathChan := make(chan string)
+	go func() {
+		pathChan <- setupEnv()
+	}()
+	path := <-pathChan
 
-
-path := async.Exec(func() interface{}  {
-	return getPath()
-})
-
-if debug{
-	fmt.Println(path)
-	os.Exit(0)
-}
-	file, err := excelize.OpenFile("J:/source2/go-projects/chromebook-checkout/cli-tool-test.xlsx")
+	file, err := excelize.OpenFile(path)
 	if err != nil {
 		println(err)
 		log.Fatal(err)
@@ -83,12 +83,12 @@ if debug{
 
 }
 
-func getPath() (string){
+func setupEnv() string {
 	var path string
-fmt.Println("enter file path: ")
-fmt.Scanln(&path)
-re := regexp.MustCompile(`\\`)
-path = re.ReplaceAllLiteralString(path, "/")
+	fmt.Println("enter file path: ")
+	fmt.Scanln(&path)
+	re := regexp.MustCompile(`\\`)
+	path = re.ReplaceAllLiteralString(path, "/")
 
-return path
+	return path
 }
