@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -16,6 +15,29 @@ import (
 		path          string
 		worksheetNames []string
 	}
+	type room struct{
+		roomNum string
+		roomContents []cbItem
+	}
+type cbItem struct{
+	itemDesc string
+	sn string
+	assetTag string
+	funding string
+	award string
+	fain string
+	titleHolder string
+	aqcDate string
+	cost string
+	fedPartPercent string
+	location string
+	condition string
+	inventoryTaken string
+	disposalDate string
+	disposalPrice string
+	campus string
+	sheetName string
+}
 
 func main() {
 
@@ -39,47 +61,43 @@ func main() {
 		log.Fatal(err)
 	}
 	defer file.Close()
+	var data map[string][]string
 
-	rows, err := file.GetRows("csp")
-	if err != nil {
+for _, sheet := range env.worksheetNames {
+	rows, err := file.GetRows(sheet)
+		if err != nil {
 		fmt.Println(err)
 		log.Fatal(err)
 	}
 
-	fmt.Println(rows[10][10])
-	var room string
-	var checkedItems [][]string
-
-	fmt.Println("Enter room number: ")
-	fmt.Scanln(&room)
-	fmt.Println(room)
-
-	for _, row := range rows {
-		for _, colCell := range row {
-			if colCell == room {
-				fmt.Println(row)
-				checkedItems = append(checkedItems, row)
-			}
-		}
+	for i, row := range rows{
+		row = append(row, sheet)
 	}
 
-	var itemsCount int = len(checkedItems)
-	var itemsString string = strconv.FormatInt(int64(itemsCount), 10)
-	msg := fmt.Sprintf("\n Checked items count: %s", itemsString)
-	fmt.Println(msg)
+}
+
+
+	// depreciated testing learning code  
+	// fmt.Println(rows[10][10])
+	// fmt.Println("Enter room number: ")
+	// fmt.Scanln(&room)
+	// fmt.Println(room)
+
+
+
 
 	var loop bool = true
 	var search string
 	for loop {
 		fmt.Println("input sn/id: ")
 		fmt.Scanln(&search)
-		if search != "" {
+		if search != "e" {
 			var loopCount int = 0 
 			for _, row := range rows {
 				loopCount++
 				if len(row) >3 {
 					if row[2] == search {
-					fmt.Println(row[10])
+					
 					}
 				}
 			}
@@ -96,6 +114,27 @@ func main() {
 
 }
 
+func newCbItem(item []string)cbItem{
+	var newItem cbItem
+	newItem.itemDesc = item[0]	
+	newItem.sn = item[1]
+	newItem.assetTag = item[2]
+	newItem.funding = item[3]
+	newItem.award = item[4]
+	newItem.fain = item[5]
+	newItem.titleHolder = item[6]
+	newItem.aqcDate = item[7]
+	newItem.cost = item[8]
+	newItem.fedPartPercent = item[9]
+	newItem.location = item[10]
+	newItem.condition = item[11]
+	newItem.inventoryTaken = item[12]
+	newItem.disposalDate = item[13]
+	newItem.disposalPrice = item[14]
+	newItem.campus = item[15]
+	return newItem
+}
+
 func setupEnv() envVariables {
 	var env envVariables
 	var worksheetStr string
@@ -103,8 +142,8 @@ func setupEnv() envVariables {
 	fmt.Scanln(&env.path)
 	re := regexp.MustCompile(`\\`)
 	env.path = re.ReplaceAllLiteralString(env.path, "/")
-fmt.Println("Enter worksheet names comma separated:")
-fmt.Scanln(&worksheetStr)
-env.worksheetNames = strings.Split(worksheetStr, ",")
+	fmt.Println("Enter worksheet names comma separated:")
+	fmt.Scanln(&worksheetStr)
+	env.worksheetNames = strings.Split(worksheetStr, ",")
 	return env
 }
