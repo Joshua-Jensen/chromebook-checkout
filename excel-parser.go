@@ -11,42 +11,41 @@ import (
 
 	"github.com/xuri/excelize/v2"
 )
-	type envVariables struct {
-		path          string
-		worksheetNames []string
-	}
-	type room struct{
-		roomNum string
-		roomContents []cbItem
-	}
-type cbItem struct{
-	itemDesc string
-	sn string
-	assetTag string
-	funding string
-	award string
-	fain string
-	titleHolder string
-	aqcDate string
-	cost string
+
+type envVariables struct {
+	path           string
+	worksheetNames []string
+}
+type room struct {
+	roomNum      string
+	roomContents []cbItem
+}
+type cbItem struct {
+	itemDesc       string
+	sn             string
+	assetTag       string
+	funding        string
+	award          string
+	fain           string
+	titleHolder    string
+	aqcDate        string
+	cost           string
 	fedPartPercent string
-	location string
-	condition string
+	location       string
+	condition      string
 	inventoryTaken string
-	disposalDate string
-	disposalPrice string
-	campus string
-	sheetName string
+	disposalDate   string
+	disposalPrice  string
+	campus         string
+	sheetName      string
 }
 
 func main() {
 
 	var env envVariables
 
-
 	var debug bool = true
 	println("debug mode:", debug)
-
 
 	envChan := make(chan envVariables)
 	go func() {
@@ -54,37 +53,29 @@ func main() {
 	}()
 	env = <-envChan
 
-
 	file, err := excelize.OpenFile(env.path)
 	if err != nil {
 		fmt.Println(err)
 		log.Fatal(err)
 	}
 	defer file.Close()
-	var data map[string][]string
+	sheetsLen := len(env.worksheetNames)
+	data := make(map[string][][]string, sheetsLen)
 
-for _, sheet := range env.worksheetNames {
-	rows, err := file.GetRows(sheet)
+	for _, sheet := range env.worksheetNames {
+		rows, err := file.GetRows(sheet)
 		if err != nil {
-		fmt.Println(err)
-		log.Fatal(err)
+			fmt.Println(err)
+			log.Fatal(err)
+		}
+		data[sheet] = rows
 	}
 
-	for i, row := range rows{
-		row = append(row, sheet)
-	}
-
-}
-
-
-	// depreciated testing learning code  
+	// depreciated testing learning code
 	// fmt.Println(rows[10][10])
 	// fmt.Println("Enter room number: ")
 	// fmt.Scanln(&room)
 	// fmt.Println(room)
-
-
-
 
 	var loop bool = true
 	var search string
@@ -92,15 +83,7 @@ for _, sheet := range env.worksheetNames {
 		fmt.Println("input sn/id: ")
 		fmt.Scanln(&search)
 		if search != "e" {
-			var loopCount int = 0 
-			for _, row := range rows {
-				loopCount++
-				if len(row) >3 {
-					if row[2] == search {
-					
-					}
-				}
-			}
+
 			search = ""
 		} else {
 			println("exiting")
@@ -114,9 +97,9 @@ for _, sheet := range env.worksheetNames {
 
 }
 
-func newCbItem(item []string)cbItem{
+func newCbItem(item []string) cbItem {
 	var newItem cbItem
-	newItem.itemDesc = item[0]	
+	newItem.itemDesc = item[0]
 	newItem.sn = item[1]
 	newItem.assetTag = item[2]
 	newItem.funding = item[3]
