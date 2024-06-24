@@ -130,3 +130,10 @@ func setupEnv() envVariables {
 	env.worksheetNames = strings.Split(worksheetStr, ",")
 	return env
 }
+
+
+func searchWorker(data [][]string) ([][]string, error){
+	for _, item := range data {
+		if 
+	}
+} 
