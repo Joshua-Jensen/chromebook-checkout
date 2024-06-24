@@ -132,8 +132,11 @@ func setupEnv() envVariables {
 }
 
 
-func searchWorker(data [][]string) ([][]string, error){
+func searchWorker(data [][]string, keyword string) ([][]string, error){
+	var foundItem [][]string
 	for _, item := range data {
-		if 
+		if item[10] == keyword {
+foundItem.
+		}
 	}
 } 
