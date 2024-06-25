@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/xuri/excelize/v2"
@@ -79,10 +80,27 @@ func main() {
 
 	var loop bool = true
 	var search string
+	
 	for loop {
 		fmt.Println("input sn/id: ")
 		fmt.Scanln(&search)
+
 		if search != "e" {
+			
+			var searchWG sync.WaitGroup
+			var bufferSize int = 10	
+
+			for key, value := range data {
+
+			}
+
+			for i := 1; i <= bufferSize; i++ {
+				searchWG.Add(1)
+				go func ()  {
+				defer searchWG.Done()
+				searchWorker()
+				}()
+			}
 
 			search = ""
 		} else {
@@ -132,11 +150,12 @@ func setupEnv() envVariables {
 }
 
 
-func searchWorker(data [][]string, keyword string) ([][]string, error){
+func searchWorker(data [][]string, keyword string) ([][]string){
 	var foundItem [][]string
 	for _, item := range data {
 		if item[10] == keyword {
-foundItem.
+foundItem = append(foundItem, item)
 		}
 	}
+	return foundItem
 } 
