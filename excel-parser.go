@@ -41,6 +41,21 @@ type cbItem struct {
 	sheetName      string
 }
 
+type task func(data map[string]string) (map[string]string)
+
+type worker struct{
+	id int
+	taskQueue <-chan task
+	resultChan <-chan Result
+}
+
+//Result is the output from each worker it should have a new map of all the found rows and what sheet it was found from
+type Result struct{
+	workerID int
+	data map[string]string
+}
+
+
 func main() {
 
 	var env envVariables
@@ -90,17 +105,6 @@ func main() {
 			var searchWG sync.WaitGroup
 			var bufferSize int = 10	
 
-			for key, value := range data {
-
-			}
-
-			for i := 1; i <= bufferSize; i++ {
-				searchWG.Add(1)
-				go func ()  {
-				defer searchWG.Done()
-				searchWorker()
-				}()
-			}
 
 			search = ""
 		} else {
@@ -148,6 +152,8 @@ func setupEnv() envVariables {
 	env.worksheetNames = strings.Split(worksheetStr, ",")
 	return env
 }
+
+
 
 
 func searchWorker(data [][]string, keyword string) ([][]string){
