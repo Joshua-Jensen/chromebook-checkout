@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gammazero/deque"
+
 	"github.com/xuri/excelize/v2"
 )
 
@@ -38,6 +40,14 @@ type cbItem struct {
 	disposalPrice  string
 	campus         string
 	sheetName      string
+}
+
+type workerPool struct{
+	 maxWorkers int
+	 workerQueue chan func()
+	 taskQueue chan func()
+	 waitingQueue deque.Deque[func()]
+
 }
 
 func main() {
@@ -131,6 +141,18 @@ func setupEnv() envVariables {
 	fmt.Scanln(&worksheetStr)
 	env.worksheetNames = strings.Split(worksheetStr, ",")
 	return env
+}
+
+func newWorkerPool(maxWorkers int) *workerPool {
+if maxWorkers<1 {
+	maxWorkers =1
+}
+pool := &workerPool{
+	maxWorkers: maxWorkers,
+	taskQueue: make(chan func()),
+	workerQueue: make(chan func()),
+}
+return pool
 }
 
 // func searchWorker(id int, data [][]string, keyword string) [][]string {

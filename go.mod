@@ -2,8 +2,10 @@ module excel-parser
 
 go 1.22.2
 
-require github.com/xuri/excelize/v2 v2.8.1
-
+require (
+	github.com/gammazero/deque v0.2.1
+	github.com/xuri/excelize/v2 v2.8.1
+)
 
 replace async => ./async
 
