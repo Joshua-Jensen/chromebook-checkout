@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/xuri/excelize/v2"
@@ -40,21 +39,6 @@ type cbItem struct {
 	campus         string
 	sheetName      string
 }
-
-type task func(data map[string]string) (map[string]string)
-
-type worker struct{
-	id int
-	taskQueue <-chan task
-	resultChan <-chan Result
-}
-
-//Result is the output from each worker it should have a new map of all the found rows and what sheet it was found from
-type Result struct{
-	workerID int
-	data map[string]string
-}
-
 
 func main() {
 
@@ -95,16 +79,12 @@ func main() {
 
 	var loop bool = true
 	var search string
-	
+
 	for loop {
 		fmt.Println("input sn/id: ")
 		fmt.Scanln(&search)
 
 		if search != "e" {
-			
-			var searchWG sync.WaitGroup
-			var bufferSize int = 10	
-
 
 			search = ""
 		} else {
@@ -153,15 +133,12 @@ func setupEnv() envVariables {
 	return env
 }
 
-
-
-
-func searchWorker(data [][]string, keyword string) ([][]string){
-	var foundItem [][]string
-	for _, item := range data {
-		if item[10] == keyword {
-foundItem = append(foundItem, item)
-		}
-	}
-	return foundItem
-} 
+// func searchWorker(id int, data [][]string, keyword string) [][]string {
+// 	var foundItem [][]string
+// 	for _, item := range data {
+// 		if item[10] == keyword {
+// 			foundItem = append(foundItem, item)
+// 		}
+// 	}
+// 	return foundItem
+// }
