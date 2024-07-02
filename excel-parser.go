@@ -152,9 +152,12 @@ pool := &workerPool{
 	taskQueue: make(chan func()),
 	workerQueue: make(chan func()),
 }
+go excel-parser.dispatch()
 return pool
 }
 
+
+func () dispatch
 // func searchWorker(id int, data [][]string, keyword string) [][]string {
 // 	var foundItem [][]string
 // 	for _, item := range data {
