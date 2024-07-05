@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -8,8 +9,6 @@ import (
 	"regexp"
 	"strings"
 	"time"
-
-	"github.com/gammazero/deque"
 
 	"github.com/xuri/excelize/v2"
 )
@@ -42,20 +41,16 @@ type cbItem struct {
 	sheetName      string
 }
 
-type workerPool struct{
-	 maxWorkers int
-	 workerQueue chan func()
-	 taskQueue chan func()
-	 waitingQueue deque.Deque[func()]
 
-}
 
 func main() {
 
 	var env envVariables
 
 	var debug bool = true
+	if debug{
 	println("debug mode:", debug)
+	}
 
 	envChan := make(chan envVariables)
 	go func() {
@@ -69,8 +64,6 @@ func main() {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	sheetsLen := len(env.worksheetNames)
-	data := make(map[string][][]string, sheetsLen)
 
 	for _, sheet := range env.worksheetNames {
 		rows, err := file.GetRows(sheet)
@@ -78,10 +71,13 @@ func main() {
 			fmt.Println(err)
 			log.Fatal(err)
 		}
-		data[sheet] = rows
+		for _, row:= range rows{
+//TODO - send each row to be made into cb item and handle the error created 
+
+		}
 	}
 
-	// depreciated testing learning code
+//NOTE depreciated testing learning code- 
 	// fmt.Println(rows[10][10])
 	// fmt.Println("Enter room number: ")
 	// fmt.Scanln(&room)
@@ -95,7 +91,7 @@ func main() {
 		fmt.Scanln(&search)
 
 		if search != "e" {
-
+//TODO - add search function with workers
 			search = ""
 		} else {
 			println("exiting")
@@ -109,25 +105,30 @@ func main() {
 
 }
 
-func newCbItem(item []string) cbItem {
+func newCbItem(item []string, sheet string) (cbItem, error)  {
 	var newItem cbItem
-	newItem.itemDesc = item[0]
-	newItem.sn = item[1]
-	newItem.assetTag = item[2]
-	newItem.funding = item[3]
-	newItem.award = item[4]
-	newItem.fain = item[5]
-	newItem.titleHolder = item[6]
-	newItem.aqcDate = item[7]
-	newItem.cost = item[8]
-	newItem.fedPartPercent = item[9]
-	newItem.location = item[10]
-	newItem.condition = item[11]
-	newItem.inventoryTaken = item[12]
-	newItem.disposalDate = item[13]
-	newItem.disposalPrice = item[14]
-	newItem.campus = item[15]
-	return newItem
+if len(item) >= 15{
+
+
+		newItem.itemDesc = item[0]
+		newItem.sn = item[1]
+		newItem.assetTag = item[2]
+		newItem.funding = item[3]
+		newItem.award = item[4]
+		newItem.fain = item[5]
+		newItem.titleHolder = item[6]
+		newItem.aqcDate = item[7]
+		newItem.cost = item[8]
+		newItem.fedPartPercent = item[9]
+		newItem.location = item[10]
+		newItem.condition = item[11]
+		newItem.inventoryTaken = item[12]
+		newItem.disposalDate = item[13]
+		newItem.disposalPrice = item[14]
+		newItem.campus = item[15]
+	return newItem,nil
+	}
+	return newItem , errors.New("row did not contain enough values to be cbItem")
 }
 
 func setupEnv() envVariables {
@@ -143,27 +144,13 @@ func setupEnv() envVariables {
 	return env
 }
 
-func newWorkerPool(maxWorkers int) *workerPool {
-if maxWorkers<1 {
-	maxWorkers =1
-}
-pool := &workerPool{
-	maxWorkers: maxWorkers,
-	taskQueue: make(chan func()),
-	workerQueue: make(chan func()),
-}
-go excel-parser.dispatch()
-return pool
-}
 
 
-func () dispatch
-// func searchWorker(id int, data [][]string, keyword string) [][]string {
-// 	var foundItem [][]string
-// 	for _, item := range data {
-// 		if item[10] == keyword {
-// 			foundItem = append(foundItem, item)
-// 		}
-// 	}
-// 	return foundItem
-// }
+func searchWorker(id int, task [][]string, keyword string) {
+	var foundItem [][]string
+	for _, item := range task {
+		if item[10] == keyword {
+			foundItem = append(foundItem, item)
+		}
+	}
+}
