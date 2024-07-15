@@ -73,7 +73,10 @@ func main() {
 		}
 		for _, row:= range rows{
 //TODO - send each row to be made into cb item and handle the error created 
-
+item, err :=newCbItem(row)
+if err ==nil {
+	
+}
 		}
 	}
 
@@ -151,6 +154,6 @@ func searchWorker(id int, task [][]string, keyword string) {
 	for _, item := range task {
 		if item[10] == keyword {
 			foundItem = append(foundItem, item)
-		}
+		}	
 	}
 }
