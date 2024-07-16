@@ -64,18 +64,19 @@ func main() {
 		log.Fatal(err)
 	}
 	defer file.Close()
-
+	var items []cbItem
 	for _, sheet := range env.worksheetNames {
 		rows, err := file.GetRows(sheet)
 		if err != nil {
 			fmt.Println(err)
 			log.Fatal(err)
 		}
+
 		for _, row:= range rows{
 //TODO - send each row to be made into cb item and handle the error created 
-item, err :=newCbItem(row)
-if err ==nil {
-	
+item, err :=newCbItem(row, sheet)
+if err == nil {
+	items = append(items, item)
 }
 		}
 	}
