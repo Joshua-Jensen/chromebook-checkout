@@ -73,7 +73,8 @@ func main() {
 		}
 
 		for _, row:= range rows{
-//TODO - send each row to be made into cb item and handle the error created 
+//TODO - send each row to be made into cb item and handle the error created  
+//REVIEW - done
 item, err :=newCbItem(row, sheet)
 if err == nil {
 	items = append(items, item)
@@ -149,7 +150,7 @@ func setupEnv() envVariables {
 }
 
 
-
+//NOTE - search function needs to work as a concurrent worker
 func searchWorker(id int, task [][]string, keyword string) {
 	var foundItem [][]string
 	for _, item := range task {
