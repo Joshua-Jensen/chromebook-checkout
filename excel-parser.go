@@ -41,15 +41,13 @@ type cbItem struct {
 	sheetName      string
 }
 
-
-
 func main() {
 
 	var env envVariables
 
 	var debug bool = true
-	if debug{
-	println("debug mode:", debug)
+	if debug {
+		println("debug mode:", debug)
 	}
 
 	envChan := make(chan envVariables)
@@ -72,17 +70,17 @@ func main() {
 			log.Fatal(err)
 		}
 
-		for _, row:= range rows{
-//TODO - send each row to be made into cb item and handle the error created  
-//REVIEW - done
-item, err :=newCbItem(row, sheet)
-if err == nil {
-	items = append(items, item)
-}
+		for _, row := range rows {
+			//TODO - send each row to be made into cb item and handle the error created
+			//REVIEW - done
+			item, err := newCbItem(row, sheet)
+			if err == nil {
+				items = append(items, item)
+			}
 		}
 	}
 
-//NOTE depreciated testing learning code- 
+	//NOTE depreciated testing learning code-
 	// fmt.Println(rows[10][10])
 	// fmt.Println("Enter room number: ")
 	// fmt.Scanln(&room)
@@ -96,7 +94,8 @@ if err == nil {
 		fmt.Scanln(&search)
 
 		if search != "e" {
-//TODO - add search function with workers
+			//TODO - add search function with workers
+
 			search = ""
 		} else {
 			println("exiting")
@@ -110,10 +109,9 @@ if err == nil {
 
 }
 
-func newCbItem(item []string, sheet string) (cbItem, error)  {
+func newCbItem(item []string, sheet string) (cbItem, error) {
 	var newItem cbItem
-if len(item) >= 15{
-
+	if len(item) >= 15 {
 
 		newItem.itemDesc = item[0]
 		newItem.sn = item[1]
@@ -131,9 +129,10 @@ if len(item) >= 15{
 		newItem.disposalDate = item[13]
 		newItem.disposalPrice = item[14]
 		newItem.campus = item[15]
-	return newItem,nil
+		newItem.sheetName = sheet
+		return newItem, nil
 	}
-	return newItem , errors.New("row did not contain enough values to be cbItem")
+	return newItem, errors.New("row did not contain enough values to be cbItem")
 }
 
 func setupEnv() envVariables {
@@ -149,13 +148,25 @@ func setupEnv() envVariables {
 	return env
 }
 
-
-//NOTE - search function needs to work as a concurrent worker
-func searchWorker(id int, task [][]string, keyword string) {
-	var foundItem [][]string
+// NOTE - search function needs to work as a concurrent worker
+func searchWorkerSN(id int, task []cbItem, keyword string) []cbItem {
+	var foundItem []cbItem
 	for _, item := range task {
-		if item[10] == keyword {
+		if item.sn == keyword {
 			foundItem = append(foundItem, item)
-		}	
+		}
 	}
+	return foundItem
+
+}
+
+func searchWorkerAssetTag(id int, task []cbItem, keyword string) []cbItem {
+	var foundItem []cbItem
+	for _, item := range task {
+		if item.assetTag == keyword {
+			foundItem = append(foundItem, item)
+		}
+	}
+
+	return foundItem
 }
