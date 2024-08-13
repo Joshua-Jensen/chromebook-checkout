@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/xuri/excelize/v2"
@@ -95,7 +97,27 @@ func main() {
 
 		if search != "e" {
 			//TODO - add search function with workers
+			var breakStart int = 0
+			var taskLen int = len(items)
+			var breakSize int = taskLen / 20
+			breakSize = int(math.Ceil(float64(breakSize)))
+			var index int = 0
+			var wg sync.WaitGroup
 
+			for index <= 20 {
+				if breakStart+breakSize > taskLen {
+
+				}
+				task := items[breakStart:]
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					searchWorkerAssetTag(index, task, search)
+				}()
+				index++
+				breakStart += breakSize
+			}
+			wg.Wait()
 			search = ""
 		} else {
 			println("exiting")
@@ -149,18 +171,18 @@ func setupEnv() envVariables {
 }
 
 // NOTE - search function needs to work as a concurrent worker
-func searchWorkerSN(id int, task []cbItem, keyword string) []cbItem {
+func searchWorkerSN(id int, task []cbItem, keyword string) ([]cbItem, int) {
 	var foundItem []cbItem
 	for _, item := range task {
 		if item.sn == keyword {
 			foundItem = append(foundItem, item)
 		}
 	}
-	return foundItem
+	return foundItem, id
 
 }
 
-func searchWorkerAssetTag(id int, task []cbItem, keyword string) []cbItem {
+func searchWorkerAssetTag(id int, task []cbItem, keyword string) ([]cbItem, int) {
 	var foundItem []cbItem
 	for _, item := range task {
 		if item.assetTag == keyword {
@@ -168,5 +190,5 @@ func searchWorkerAssetTag(id int, task []cbItem, keyword string) []cbItem {
 		}
 	}
 
-	return foundItem
+	return foundItem, id
 }
