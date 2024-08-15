@@ -99,16 +99,18 @@ func main() {
 			//TODO - add search function with workers
 			var breakStart int = 0
 			var taskLen int = len(items)
-			var breakSize int = taskLen / 20
-			breakSize = int(math.Ceil(float64(breakSize)))
+			var breakSizeFloat float32 = float32(taskLen) / 20
+			var breakSize int = int(math.Ceil(float64(breakSizeFloat)))
 			var index int = 0
 			var wg sync.WaitGroup
 
 			for index <= 20 {
+				var task []cbItem
 				if breakStart+breakSize > taskLen {
-
+					task = items[breakStart:taskLen]
+				} else {
+					task = items[breakStart : breakStart+breakSize]
 				}
-				task := items[breakStart:]
 				wg.Add(1)
 				go func() {
 					defer wg.Done()
