@@ -41,7 +41,7 @@ type cbItem struct {
 	disposalPrice  string
 	campus         string
 	sheetName      string
-	row            int
+	rowInt         int
 }
 
 func main() {
@@ -59,6 +59,7 @@ func main() {
 	}()
 	env = <-envChan
 
+fmt.Println("")
 	file, err := excelize.OpenFile(env.path)
 	if err != nil {
 		fmt.Println(err)
@@ -73,11 +74,10 @@ func main() {
 			log.Fatal(err)
 		}
 
-		for i:=0; i>=len(rows); i++ {
+		for rowInt, row := range rows {
 			//TODO - send each row to be made into cb item and handle the error created
 			//REVIEW - done
-			row := rows[i]
-			item, err := newCbItem(row, sheet,i )
+			item, err := newCbItem(row, sheet, rowInt)
 			if err == nil {
 				items = append(items, item)
 			}
@@ -135,7 +135,7 @@ func main() {
 
 }
 
-func newCbItem(item []string, sheet string, row int) (cbItem, error) {
+func newCbItem(item []string, sheet string, rowInt int) (cbItem, error) {
 	var newItem cbItem
 	if len(item) >= 15 {
 
@@ -149,9 +149,9 @@ func newCbItem(item []string, sheet string, row int) (cbItem, error) {
 		newItem.aqcDate = item[7]
 		newItem.cost = item[8]
 		newItem.fedPartPercent = item[9]
-		if sheet == "general"{
-		newItem.location = item[9]
-		}else {
+		if sheet == "general" {
+			newItem.location = item[9]
+		} else {
 			newItem.location = item[10]
 		}
 		newItem.condition = item[11]
@@ -160,7 +160,7 @@ func newCbItem(item []string, sheet string, row int) (cbItem, error) {
 		newItem.disposalPrice = item[14]
 		newItem.campus = item[15]
 		newItem.sheetName = sheet
-		newItem.row = row
+		newItem.rowInt = rowInt
 		return newItem, nil
 	}
 	return newItem, errors.New("row did not contain enough values to be cbItem")
@@ -202,7 +202,17 @@ func searchWorkerAssetTag(id int, task []cbItem, keyword string) ([]cbItem, int)
 	return foundItem, id
 }
 
-func changeRoom(selected cbItem, roomNumber string, file *excelize.File) {
-	cell
-	file.SetCellValue(selected.sheetName, , roomNumber)
+func changeRoom(selected cbItem, roomNumber string, file *excelize.File) error {
+	var coordinates string
+	if selected.sheetName == "general" {
+		coordinates = fmt.Sprintf("%s_%s", "I", string(selected.rowInt))
+	} else {
+		coordinates = fmt.Sprintf("%s_%s", "K", string(selected.rowInt))
+
+	}
+	err := file.SetCellValue(selected.sheetName, coordinates, roomNumber)
+	if err != nil {
+		return err
+	}
+	return nil
 }
