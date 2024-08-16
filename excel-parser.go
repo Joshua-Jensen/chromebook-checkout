@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/xuri/excelize/v2"
@@ -44,6 +43,11 @@ type cbItem struct {
 	rowInt         int
 }
 
+type searchWorkerResult struct {
+	goodResult []cbItem
+	id         int
+}
+
 func main() {
 
 	var env envVariables
@@ -59,7 +63,7 @@ func main() {
 	}()
 	env = <-envChan
 
-fmt.Println("")
+	fmt.Println("")
 	file, err := excelize.OpenFile(env.path)
 	if err != nil {
 		fmt.Println(err)
@@ -83,6 +87,9 @@ fmt.Println("")
 			}
 		}
 	}
+	var newRoomNum string
+	fmt.Println("Enter room number to add to")
+	fmt.Scanln(&newRoomNum)
 
 	//NOTE depreciated testing learning code-
 	// fmt.Println(rows[10][10])
@@ -104,24 +111,31 @@ fmt.Println("")
 			var breakSizeFloat float32 = float32(taskLen) / 20
 			var breakSize int = int(math.Ceil(float64(breakSizeFloat)))
 			var index int = 0
-			var wg sync.WaitGroup
+			workerChan := make(chan searchWorkerResult)
+			go func() {
 
-			for index <= 20 {
-				var task []cbItem
-				if breakStart+breakSize > taskLen {
-					task = items[breakStart:taskLen]
-				} else {
-					task = items[breakStart : breakStart+breakSize]
+				for index <= 20 {
+					var task []cbItem
+					if breakStart+breakSize > taskLen {
+						task = items[breakStart:taskLen]
+					} else {
+						task = items[breakStart : breakStart+breakSize]
+					}
+					var message searchWorkerResult
+					message.goodResult = task
+					message.id = index
+					workerChan <- message
+					// wg.Add(1)
+					// go func() {
+					// 	defer wg.Done()
+					// 	searchWorkerAssetTag(index, task, search)
+					// }()
+					index++
+					breakStart += breakSize
 				}
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					searchWorkerAssetTag(index, task, search)
-				}()
-				index++
-				breakStart += breakSize
-			}
-			wg.Wait()
+			}()
+			close(workerChan)
+			println()
 			search = ""
 		} else {
 			println("exiting")
@@ -180,18 +194,17 @@ func setupEnv() envVariables {
 }
 
 // NOTE - search function needs to work as a concurrent worker
-func searchWorkerSN(id int, task []cbItem, keyword string) ([]cbItem, int) {
+func searchWorkerSN(id int, task []cbItem, keyword string) {
 	var foundItem []cbItem
 	for _, item := range task {
 		if item.sn == keyword {
 			foundItem = append(foundItem, item)
 		}
 	}
-	return foundItem, id
 
 }
 
-func searchWorkerAssetTag(id int, task []cbItem, keyword string) ([]cbItem, int) {
+func searchWorkerAssetTag(id int, task []cbItem, keyword string) {
 	var foundItem []cbItem
 	for _, item := range task {
 		if item.assetTag == keyword {
@@ -199,7 +212,6 @@ func searchWorkerAssetTag(id int, task []cbItem, keyword string) ([]cbItem, int)
 		}
 	}
 
-	return foundItem, id
 }
 
 func changeRoom(selected cbItem, roomNumber string, file *excelize.File) error {
