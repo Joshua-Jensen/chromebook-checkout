@@ -46,6 +46,8 @@ type cbItem struct {
 type searchWorkerResult struct {
 	goodResult []cbItem
 	id         int
+	keyword    string
+	task       []cbItem
 }
 
 func main() {
@@ -122,7 +124,7 @@ func main() {
 						task = items[breakStart : breakStart+breakSize]
 					}
 					var message searchWorkerResult
-					message.goodResult = task
+					message.task = task
 					message.id = index
 					workerChan <- message
 					// wg.Add(1)
@@ -194,24 +196,22 @@ func setupEnv() envVariables {
 }
 
 // NOTE - search function needs to work as a concurrent worker
-func searchWorkerSN(id int, task []cbItem, keyword string) {
-	var foundItem []cbItem
-	for _, item := range task {
-		if item.sn == keyword {
-			foundItem = append(foundItem, item)
+func searchWorkerSN(ch chan searchWorkerResult, incoming searchWorkerResult) {
+	for _, item := range incoming.task {
+		if item.sn == incoming.keyword {
+			incoming.goodResult = append(incoming.goodResult, item)
 		}
 	}
-
+	ch <- incoming
 }
 
-func searchWorkerAssetTag(id int, task []cbItem, keyword string) {
-	var foundItem []cbItem
-	for _, item := range task {
-		if item.assetTag == keyword {
-			foundItem = append(foundItem, item)
+func searchWorkerAssetTag(ch chan searchWorkerResult, incoming searchWorkerResult) {
+	for _, item := range incoming.task {
+		if item.assetTag == incoming.keyword {
+			incoming.goodResult = append(incoming.goodResult, item)
 		}
 	}
-
+	ch <- incoming
 }
 
 func changeRoom(selected cbItem, roomNumber string, file *excelize.File) error {
