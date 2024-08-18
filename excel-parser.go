@@ -21,8 +21,8 @@ type room struct {
 }
 type cbItem struct {
 	// itemDesc       string
-	sn             string
-	assetTag       string
+	sn       string
+	assetTag string
 	// funding        string
 	// award          string
 	// fain           string
@@ -30,14 +30,14 @@ type cbItem struct {
 	// aqcDate        string
 	// cost           string
 	// fedPartPercent string
-	location       string
+	location string
 	// condition      string
 	// inventoryTaken string
 	// disposalDate   string
 	// disposalPrice  string
 	// campus         string
-	sheetName      string
-	rowInt         int
+	sheetName string
+	rowInt    int
 }
 
 type searchWorkerResult struct {
@@ -52,6 +52,7 @@ func main() {
 	var env envVariables
 
 	var debug bool = true
+	var refactored bool = true
 	if debug {
 		println("debug mode:", debug)
 	}
@@ -71,28 +72,41 @@ func main() {
 	defer file.Close()
 	var items []cbItem
 	for _, sheet := range env.worksheetNames {
-		rows, err := file.GetRows(sheet)
+		rowIterator, err := file.Rows(sheet)
 		if err != nil {
 			fmt.Println(err)
-			log.Fatal(err)
 		}
+		fmt.Println(rowIterator)
 
-		for rowInt, row := range rows {
-			//TODO - send each row to be made into cb item and handle the error created
-			//REVIEW - done
-			if len(row)> 4 {
-			item := newCbItem(row, sheet, rowInt)
-				items = append(items, item)
-			}else{
-				fmt.Println("unsupported item", row)
+	}
+
+	//NOTE - refactoring to make the desired data consistent
+	//SECTION - getting all rows on all sheets
+	if refactored != true {
+		for _, sheet := range env.worksheetNames {
+			rows, err := file.GetRows(sheet)
+			if err != nil {
+				fmt.Println(err)
+				log.Fatal(err)
+			}
+
+			for rowInt, row := range rows {
+				//TODO - send each row to be made into cb item and handle the error created
+				//REVIEW - done
+				if len(row) > 4 {
+					item := newCbItem(row, sheet, rowInt)
+					items = append(items, item)
+				} else {
+					fmt.Println("unsupported item", row)
+				}
 			}
 		}
+		for _, printRow := range items {
+			fmt.Println(printRow)
+		}
 	}
-for _, printRow := range items{
-	fmt.Println(printRow)
-}
 
-
+	//SECTION - get room number here
 	var newRoomNum string
 	fmt.Println("Enter room number to add to")
 	fmt.Scanln(&newRoomNum)
@@ -172,36 +186,33 @@ for _, printRow := range items{
 
 }
 
-func newCbItem(item []string, sheet string, rowInt int) (cbItem) {
+func newCbItem(item []string, sheet string, rowInt int) cbItem {
 	var newItem cbItem
-	
 
-		newItem.itemDesc = item[0]
-		newItem.sn = item[1]
-		newItem.assetTag = item[2]
-		newItem.funding = item[3]
-		newItem.award = item[4]
-		newItem.fain = item[5]
-		newItem.titleHolder = item[6]
-		newItem.aqcDate = item[7]
-		newItem.cost = item[8]
-		newItem.fedPartPercent = item[9]
-		if sheet == "general" {
-			newItem.location = item[9]
-		} else {
-			newItem.location = item[10]
-		}
-		newItem.condition = item[11]
-		newItem.inventoryTaken = item[12]
-		newItem.disposalDate = item[13]
-		newItem.disposalPrice = item[14]
-		newItem.campus = item[15]
-		newItem.sheetName = sheet
-		newItem.rowInt = rowInt
-		return newItem
+	// newItem.itemDesc = item[0]
+	newItem.sn = item[1]
+	// newItem.assetTag = item[2]
+	// newItem.funding = item[3]
+	// newItem.award = item[4]
+	// newItem.fain = item[5]
+	// newItem.titleHolder = item[6]
+	// newItem.aqcDate = item[7]
+	// newItem.cost = item[8]
+	// newItem.fedPartPercent = item[9]
+	if sheet == "general" {
+		newItem.location = item[9]
+	} else {
+		newItem.location = item[10]
 	}
-
-
+	// newItem.condition = item[11]
+	// newItem.inventoryTaken = item[12]
+	// newItem.disposalDate = item[13]
+	// newItem.disposalPrice = item[14]
+	// newItem.campus = item[15]
+	newItem.sheetName = sheet
+	newItem.rowInt = rowInt
+	return newItem
+}
 
 func setupEnv() envVariables {
 	var env envVariables
