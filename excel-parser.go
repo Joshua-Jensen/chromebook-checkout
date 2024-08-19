@@ -79,14 +79,25 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 			}
-			var data [][]string
-			for id, col := range cols[0] {
-				data[id][0] = col[id]
-
+			var firstRow []string = cols[1]
+			for index, data := range firstRow {
+				if data != "" {
+					var createItem []string
+					// fmt.Println(index, data)
+					createItem = append(createItem, data)
+					createItem = append(createItem, cols[1][index])
+					createItem = append(createItem, cols[2][index])
+					createItem = append(createItem, cols[8][index])
+					createItem = append(createItem, cols[9][index])
+					// fmt.Println(createItem)
+					item := newCbItem(createItem, sheet, index)
+					// fmt.Println(item)
+					items = append(items, item)
+				}
 			}
 		}
 	}
-
+	fmt.Println(items)
 	//NOTE - refactoring to make the desired data consistent
 	//SECTION - getting all rows on all sheets ignore
 	// if !refactored {
@@ -195,34 +206,32 @@ func main() {
 
 func newCbItem(item []string, sheet string, rowInt int) cbItem {
 	var newItem cbItem
-	if len(item) > 10 {
 
-		// newItem.itemDesc = item[0]
-		newItem.sn = item[1]
-		// newItem.assetTag = item[2]
-		// newItem.funding = item[3]
-		// newItem.award = item[4]
-		// newItem.fain = item[5]
-		// newItem.titleHolder = item[6]
-		// newItem.aqcDate = item[7]
-		// newItem.cost = item[8]
-		// newItem.fedPartPercent = item[9]
-		if sheet == "general" {
-			newItem.location = item[8]
-		} else {
-			newItem.location = item[10]
-		}
-		// newItem.condition = item[11]
-		// newItem.inventoryTaken = item[12]
-		// newItem.disposalDate = item[13]
-		// newItem.disposalPrice = item[14]
-		// newItem.campus = item[15]
-		newItem.sheetName = sheet
-		newItem.rowInt = rowInt
-		fmt.Println(newItem)
-		return newItem
+	// newItem.itemDesc = item[0]
+	newItem.sn = item[0]
+	newItem.assetTag = item[1]
+	// newItem.funding = item[3]
+	// newItem.award = item[4]
+	// newItem.fain = item[5]
+	// newItem.titleHolder = item[6]
+	// newItem.aqcDate = item[7]
+	// newItem.cost = item[8]
+	// newItem.fedPartPercent = item[9]
+	if sheet == "general" {
+		newItem.location = item[2]
+	} else {
+		newItem.location = item[3]
 	}
+	// newItem.condition = item[11]
+	// newItem.inventoryTaken = item[12]
+	// newItem.disposalDate = item[13]
+	// newItem.disposalPrice = item[14]
+	// newItem.campus = item[15]
+	newItem.sheetName = sheet
+	newItem.rowInt = rowInt
+	fmt.Println(newItem)
 	return newItem
+
 }
 
 func setupEnv() envVariables {
