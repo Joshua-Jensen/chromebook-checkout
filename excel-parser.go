@@ -70,41 +70,47 @@ func main() {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	var items []cbItem
-	for _, sheet := range env.worksheetNames {
-		rowIterator, err := file.Rows(sheet)
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println(rowIterator)
 
+	//SECTION - new collection of data and creating of cb items
+	var items []cbItem
+	if refactored {
+		for _, sheet := range env.worksheetNames {
+			cols, err := file.GetCols(sheet)
+			if err != nil {
+				fmt.Println(err)
+			}
+			var data [][]string
+			for id, col := range cols{
+				data[0] = 
+			}
+		}
 	}
 
 	//NOTE - refactoring to make the desired data consistent
-	//SECTION - getting all rows on all sheets
-	if refactored != true {
-		for _, sheet := range env.worksheetNames {
-			rows, err := file.GetRows(sheet)
-			if err != nil {
-				fmt.Println(err)
-				log.Fatal(err)
-			}
+	//SECTION - getting all rows on all sheets ignore
+	// if !refactored {
+	// 	for _, sheet := range env.worksheetNames {
+	// 		rows, err := file.GetRows(sheet)
+	// 		if err != nil {
+	// 			fmt.Println(err)
+	// 			log.Fatal(err)
+	// 		}
 
-			for rowInt, row := range rows {
-				//TODO - send each row to be made into cb item and handle the error created
-				//REVIEW - done
-				if len(row) > 4 {
-					item := newCbItem(row, sheet, rowInt)
-					items = append(items, item)
-				} else {
-					fmt.Println("unsupported item", row)
-				}
-			}
-		}
-		for _, printRow := range items {
-			fmt.Println(printRow)
-		}
-	}
+	// 		for rowInt, row := range rows {
+	// 			//TODO - send each row to be made into cb item and handle the error created
+	// 			//REVIEW - done
+	// 			if len(row) > 4 {
+	// 				item := newCbItem(row, sheet, rowInt)
+	// 				items = append(items, item)
+	// 			} else {
+	// 				fmt.Println("unsupported item", row)
+	// 			}
+	// 		}
+	// 	}
+	// 	for _, printRow := range items {
+	// 		fmt.Println(printRow)
+	// 	}
+	// }
 
 	//SECTION - get room number here
 	var newRoomNum string
@@ -136,7 +142,7 @@ func main() {
 							fmt.Println(err)
 						}
 					}()
-					fmt.Println(item)
+					// fmt.Println(item)
 				}
 			}
 
@@ -188,29 +194,33 @@ func main() {
 
 func newCbItem(item []string, sheet string, rowInt int) cbItem {
 	var newItem cbItem
+	if len(item) > 10 {
 
-	// newItem.itemDesc = item[0]
-	newItem.sn = item[1]
-	// newItem.assetTag = item[2]
-	// newItem.funding = item[3]
-	// newItem.award = item[4]
-	// newItem.fain = item[5]
-	// newItem.titleHolder = item[6]
-	// newItem.aqcDate = item[7]
-	// newItem.cost = item[8]
-	// newItem.fedPartPercent = item[9]
-	if sheet == "general" {
-		newItem.location = item[9]
-	} else {
-		newItem.location = item[10]
+		// newItem.itemDesc = item[0]
+		newItem.sn = item[1]
+		// newItem.assetTag = item[2]
+		// newItem.funding = item[3]
+		// newItem.award = item[4]
+		// newItem.fain = item[5]
+		// newItem.titleHolder = item[6]
+		// newItem.aqcDate = item[7]
+		// newItem.cost = item[8]
+		// newItem.fedPartPercent = item[9]
+		if sheet == "general" {
+			newItem.location = item[8]
+		} else {
+			newItem.location = item[10]
+		}
+		// newItem.condition = item[11]
+		// newItem.inventoryTaken = item[12]
+		// newItem.disposalDate = item[13]
+		// newItem.disposalPrice = item[14]
+		// newItem.campus = item[15]
+		newItem.sheetName = sheet
+		newItem.rowInt = rowInt
+		fmt.Println(newItem)
+		return newItem
 	}
-	// newItem.condition = item[11]
-	// newItem.inventoryTaken = item[12]
-	// newItem.disposalDate = item[13]
-	// newItem.disposalPrice = item[14]
-	// newItem.campus = item[15]
-	newItem.sheetName = sheet
-	newItem.rowInt = rowInt
 	return newItem
 }
 
