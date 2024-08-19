@@ -80,8 +80,9 @@ func main() {
 				fmt.Println(err)
 			}
 			var data [][]string
-			for id, col := range cols{
-				data[0] = 
+			for id, col := range cols[0] {
+				data[id][0] = col[id]
+
 			}
 		}
 	}
