@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"os/exec"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/xuri/excelize/v2"
@@ -85,19 +86,19 @@ func main() {
 					var createItem []string
 					// fmt.Println(index, data)
 					createItem = append(createItem, data)
-					createItem = append(createItem, cols[1][index])
+					// createItem = append(createItem, cols[1][index])
 					createItem = append(createItem, cols[2][index])
 					createItem = append(createItem, cols[8][index])
-					createItem = append(createItem, cols[9][index])
+					createItem = append(createItem, cols[10][index])
 					// fmt.Println(createItem)
 					item := newCbItem(createItem, sheet, index)
-					// fmt.Println(item)
+					fmt.Println(item)
 					items = append(items, item)
 				}
 			}
 		}
 	}
-	fmt.Println(items)
+	// fmt.Println(items)
 	//NOTE - refactoring to make the desired data consistent
 	//SECTION - getting all rows on all sheets ignore
 	// if !refactored {
@@ -141,19 +142,62 @@ func main() {
 	for loop {
 		fmt.Println("input sn/id: ")
 		fmt.Scanln(&search)
-		fmt.Println("searching ....")
+
+		if search == "c" {
+			fmt.Println("Enter room number to add to")
+			fmt.Scanln(&newRoomNum)
+			fmt.Println("entered room number: ", newRoomNum)
+		}
 		if search != "e" {
-			var wg sync.WaitGroup
+			// var wg sync.WaitGroup
+			c := exec.Command("clear")
+			c.Stdout = os.Stdout
+			c.Run()
+			fmt.Println("input sn/id:")
+			fmt.Println(search)
+			fmt.Println("searching ....")
 			for _, item := range items {
+				// fmt.Println(item.assetTag)
 				if item.assetTag == search {
 					fmt.Println(item)
-					wg.Add(1)
-					go func() {
-						err := changeRoom(item, newRoomNum, *&file)
+					//NOTE - hack in the replacement code here instead of its own function
+
+					var coordinates string
+					if item.sheetName == "general" {
+						coordinates, err = excelize.CoordinatesToCellName(9, item.rowInt+1)
 						if err != nil {
 							fmt.Println(err)
 						}
-					}()
+					} else {
+						coordinates, err = excelize.CoordinatesToCellName(10, (item.rowInt + 1))
+						if err != nil {
+							fmt.Println(err)
+						}
+					}
+
+					err := file.SetCellValue(item.sheetName, coordinates, newRoomNum)
+					if err != nil {
+						fmt.Println(err)
+					}
+					fmt.Println("saving ...")
+					file.Save()
+					fmt.Println("saved")
+					//NOTE - testing purposes
+					changedValue, err := file.GetCellValue(item.sheetName, coordinates)
+					if err != nil {
+						fmt.Println(err)
+					}
+					fmt.Println("new room number is:", changedValue)
+
+					//NOTE - maybe this will work in future but not right now
+					// fmt.Println(item)
+					// wg.Add(1)
+					// go func() {
+					// 	err := changeRoom(item, newRoomNum, *&file)
+					// 	if err != nil {
+					// 		fmt.Println(err)
+					// 	}
+					// }()
 					// fmt.Println(item)
 				}
 			}
@@ -192,13 +236,15 @@ func main() {
 			// }()
 			// close(workerChan)
 			search = ""
-		} else {
-			println("exiting")
-			time.Sleep(time.Second)
-			// c := exec.Command("clear")
-			// c.Stdout = os.Stdout
-			// c.Run()
-			loop = false
+		} else if search == "e" {
+			{
+				println("exiting")
+				time.Sleep(time.Second)
+				// c := exec.Command("clear")
+				// c.Stdout = os.Stdout
+				// c.Run()
+				loop = false
+			}
 		}
 	}
 
